@@ -18,14 +18,10 @@ import java.security.Principal;
 @Controller
 public class UserController {
 
-    @Value("${app.logout-url}")
-    private String logoutUrl;
     private final static String USER =  "user";
     private final static String FIRST_NAME =  "first_name";
     private final static String LAST_NAME =  "last_name";
     private final static String EMAIL =  "email";
-    private final static String LOCATION =  "location";
-    private final static int STATUS =  302;
 
     @GetMapping("/user")
     public String customers(Model model) {
@@ -51,7 +47,8 @@ public class UserController {
     }
 
     @GetMapping(path = "/logout")
-    public void logout(HttpServletResponse response) throws ServletException, IOException {
-        response.sendRedirect(logoutUrl);
+    public String logout(HttpServletResponse response) throws ServletException {
+        request.logout();
+        return "redirect: user";
     }
 }
