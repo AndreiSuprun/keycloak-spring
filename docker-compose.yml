@@ -1,0 +1,62 @@
+version: '3.3'
+volumes:
+  postgres_data:
+      driver: local
+services:
+  postgres:
+      image: postgres
+      container_name: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+      networks:
+        - common-network
+  keycloak:
+      container_name: keycloak
+      image: quay.io/keycloak/keycloak:latest
+      environment:
+        KEYCLOAK_IMPORT: /tmp/realm-export.json
+        DB_VENDOR: POSTGRES
+        DB_ADDR: postgres
+        DB_DATABASE: keycloak
+        DB_USER: keycloak
+        DB_SCHEMA: public
+        DB_PASSWORD: password
+        #KEYCLOAK_USER: admin
+        #KEYCLOAK_PASSWORD: admin
+      ports:
+        - "8080:8080"
+      depends_on:
+        - postgres
+      volumes:
+        - ./keycloak/realms/realm-export.json:/tmp/realm-export.json
+      networks:
+        - common-network
+  spring-app:
+    container_name: spring-app
+    environment:
+      KEYCLOAK_AUTH-SERVER-URL: http://keycloak:8080/auth
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spring-app:latest
+    ports:
+      - "8081:8081"
+    depends_on:
+      - keycloak
+    networks:
+      - common-network
+  mailcatcher:
+    image: schickling/mailcatcher
+    container_name: mailcatcher
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - common-network
+networks:
+  common-network:
+    driver: bridge
