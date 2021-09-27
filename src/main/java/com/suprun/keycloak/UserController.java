@@ -49,6 +49,6 @@ public class UserController {
     @GetMapping(path = "/logout")
     public String logout(HttpServletResponse response) throws ServletException {
         request.logout();
-        return "redirect: user";
+        return "redirect:user";
     }
 }
